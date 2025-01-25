@@ -83,4 +83,9 @@ Run tests with:
 ```bash
 npm test
 
+## CI/CD
+CI: GitHub Actions
+CD: Fastlane (Android)
+For detailed CI/CD setup, refer to .github/workflows/ci.yml and android/fastlane/Fastfile.
+
 
