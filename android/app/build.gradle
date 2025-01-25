@@ -1,0 +1,108 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+
+react {
+    /* Folders */
+    // root = file("../../")  // The root of your project, where "package.json" lives. Default is '../..'
+    // reactNativeDir = file("../../node_modules/react-native")  // Path to React Native package
+    // codegenDir = file("../../node_modules/@react-native/codegen")  // Path to the Codegen package
+    // cliFile = file("../../node_modules/react-native/cli.js")  // Path to the React Native CLI entrypoint
+
+    /* Variants */
+    // debuggableVariants = ["liteDebug", "prodDebug"]  // Add custom debuggable variants
+
+    /* Bundling */
+    // nodeExecutableAndArgs = ["node"]  // Command for bundling
+    // bundleCommand = "ram-bundle"  // Command to run for bundling JS
+    // bundleConfig = file(../rn-cli.config.js)  // Path to bundle config file
+    // bundleAssetName = "MyApplication.android.bundle"  // Name for JS bundle asset
+    // entryFile = file("../js/MyApplication.android.js")  // Entry file for bundle
+    // extraPackagerArgs = []  // List of extra flags for the bundler
+
+    /* Hermes Commands */
+    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"  // Custom Hermes compiler command
+    // hermesFlags = ["-O", "-output-source-map"]  // Flags for Hermes compiler
+
+    /* Autolinking */
+    autolinkLibrariesWithApp()  // Automatically links native modules
+}
+
+/**
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
+ */
+def enableProguardInReleaseBuilds = false
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'  // Default JSC flavor
+
+android {
+    ndkVersion rootProject.ext.ndkVersion  // Use NDK version from root project
+    buildToolsVersion rootProject.ext.buildToolsVersion  // Build tools version from root project
+    compileSdkVersion rootProject.ext.compileSdkVersion  // Compile SDK version from root project
+
+    namespace "com.authenticationapp"  // Set your app namespace
+    defaultConfig {
+        applicationId "com.authenticationapp"  // Unique app identifier
+        minSdkVersion rootProject.ext.minSdkVersion  // Minimum SDK version from root project
+        targetSdkVersion rootProject.ext.targetSdkVersion  // Target SDK version from root project
+        versionCode 1  // Version code for the app
+        versionName "1.0"  // Version name for the app
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')  // Path to the debug keystore
+            storePassword 'android'  // Password for the keystore
+            keyAlias 'androiddebugkey'  // Key alias for the debug keystore
+            keyPassword 'android'  // Password for the debug key
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug  // Debug signing configuration
+        }
+        release {
+            signingConfig signingConfigs.debug  // Release signing configuration (use a real keystore for production)
+            minifyEnabled enableProguardInReleaseBuilds  // Enable Proguard for release builds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"  // Proguard files
+        }
+    }
+}
+
+dependencies {
+    // The version of react-native is set by the React Native Gradle Plugin
+    implementation("com.facebook.react:react-android")
+
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")  // Use Hermes if enabled
+    } else {
+        implementation jscFlavor  // Use JSC if Hermes is not enabled
+    }
+
+    // Additional dependencies for testing and development
+    testImplementation("junit:junit:4.13.2")  // JUnit for testing
+    testImplementation("org.assertj:assertj-core:3.21.0")  // AssertJ for assertions in tests
+    implementation("com.google.code.gson:gson:2.8.8")  // Gson for JSON parsing
+    implementation("com.google.guava:guava:30.1-jre")  // Guava for additional utilities
+}
+
+// Ensure you have the following properties in your root project's build.gradle for SDK versions
+ext {
+    compileSdkVersion = 33  // Set the compile SDK version
+    minSdkVersion = 21  // Set the minimum SDK version
+    targetSdkVersion = 33  // Set the target SDK version
+    ndkVersion = "21.4.7075529"  // Set the NDK version
+    buildToolsVersion = "30.0.3"  // Set the build tools version
+}
